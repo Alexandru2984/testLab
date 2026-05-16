@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="robots" content="noindex" />
+    <title>Micu TestLab</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">⌬</span>
+        <div>
+          <h1>Micu TestLab</h1>
+          <p class="subtitle">Public health dashboard for VPS services</p>
+        </div>
+      </div>
+      <div class="actions">
+        <span id="last-checked" class="muted">Loading…</span>
+        <button id="refresh-btn" type="button">Run checks now</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="overview" id="overview">
+        <div class="stat" data-kind="total">
+          <span class="label">Total</span>
+          <span class="value" id="stat-total">—</span>
+        </div>
+        <div class="stat" data-kind="online">
+          <span class="label">Online</span>
+          <span class="value" id="stat-online">—</span>
+        </div>
+        <div class="stat" data-kind="offline">
+          <span class="label">Offline</span>
+          <span class="value" id="stat-offline">—</span>
+        </div>
+        <div class="stat" data-kind="slow">
+          <span class="label">Slow</span>
+          <span class="value" id="stat-slow">—</span>
+        </div>
+        <div class="stat" data-kind="latency">
+          <span class="label">Avg latency</span>
+          <span class="value" id="stat-latency">—</span>
+        </div>
+      </section>
+
+      <section id="cards" class="cards" aria-live="polite">
+        <div class="placeholder">Loading services…</div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>TestLab · self-hosted on test.micutu.com</span>
+      <span id="health-pill" class="pill pill-unknown">api: …</span>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

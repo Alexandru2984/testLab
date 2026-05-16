@@ -1,0 +1,17 @@
+{
+  "name": "testlab",
+  "version": "1.0.0",
+  "description": "Micu TestLab - public dashboard for monitoring VPS services",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@fastify/static": "^7.0.4",
+    "fastify": "^4.28.1"
+  }
+}
