@@ -47,6 +47,17 @@
         </div>
       </section>
 
+      <section class="toolbar">
+        <input id="search" type="search" placeholder="Filter by name, host, stack…" autocomplete="off" />
+        <div class="filter-group" id="status-filters">
+          <button type="button" class="filter active" data-filter="all">All</button>
+          <button type="button" class="filter" data-filter="online">Online</button>
+          <button type="button" class="filter" data-filter="slow">Slow</button>
+          <button type="button" class="filter" data-filter="offline">Offline</button>
+        </div>
+        <span class="muted" id="visible-count"></span>
+      </section>
+
       <section id="cards" class="cards" aria-live="polite">
         <div class="placeholder">Loading services…</div>
       </section>

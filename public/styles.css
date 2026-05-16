@@ -166,6 +166,54 @@ main {
 .stat[data-kind='offline'] .value { color: var(--offline); }
 .stat[data-kind='slow'] .value { color: var(--slow); }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+#search {
+  flex: 1 1 280px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+#search:focus {
+  border-color: var(--accent);
+}
+
+.filter-group {
+  display: inline-flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.filter {
+  background: transparent;
+  color: var(--muted);
+  border: 0;
+  font-size: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+}
+
+.filter:last-child { border-right: 0; }
+.filter:hover { background: var(--bg-elev-2); color: var(--text); }
+.filter.active { background: var(--accent); color: #0b0d10; }
+.filter.active:hover { background: var(--accent-2); color: #fff; }
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
@@ -226,6 +274,7 @@ main {
 }
 
 .badge.stack-django { background: #0c4a3d; color: #82e0c1; border-color: #186548; }
+.badge.stack-python { background: #1a3656; color: #8ab4f8; border-color: #224a78; }
 .badge.stack-react { background: #0c364f; color: #61dafb; border-color: #154e6e; }
 .badge.stack-c { background: #1f2b46; color: #9fb6e6; border-color: #2c3c64; }
 .badge.stack-zig { background: #4a2516; color: #f7a16c; border-color: #6b3622; }
@@ -233,6 +282,29 @@ main {
 .badge.stack-go { background: #0a3f4a; color: #5ed3df; border-color: #155764; }
 .badge.stack-ai { background: #2d1a47; color: #c8a4f4; border-color: #432870; }
 .badge.stack-node { background: #1a3a1a; color: #80d080; border-color: #2c5a2c; }
+.badge.stack-elixir { background: #2e1a40; color: #a78bda; border-color: #43286b; }
+.badge.stack-ruby { background: #4a1a1f; color: #f08a8a; border-color: #6b2830; }
+.badge.stack-haskell { background: #2a1a4e; color: #b59cff; border-color: #3d2872; }
+.badge.stack-static { background: #2a2a2a; color: #b8b8b8; border-color: #404040; }
+
+.meta-line {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-line .chip {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.meta-line .chip.warn { color: var(--slow); border-color: rgba(247, 185, 85, 0.4); }
+.meta-line .chip.ok { color: var(--online); border-color: rgba(63, 185, 80, 0.3); }
 
 .card-row {
   display: flex;
