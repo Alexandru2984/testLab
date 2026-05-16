@@ -11,7 +11,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@fastify/static": "^7.0.4",
-    "fastify": "^4.28.1"
+    "@fastify/static": "^9.0.0",
+    "fastify": "^5.0.0"
   }
 }

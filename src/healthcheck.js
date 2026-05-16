@@ -7,7 +7,19 @@ function classify(latencyMs, ok) {
   return 'online';
 }
 
+function isSafeHttpUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 async function probe(url, { timeoutMs = DEFAULT_TIMEOUT_MS, method = 'GET' } = {}) {
+  if (!isSafeHttpUrl(url)) {
+    return { ok: false, status: 0, latency: 0, reason: 'invalid_url' };
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const start = Date.now();

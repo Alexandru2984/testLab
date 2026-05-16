@@ -48,13 +48,19 @@ nginx returns a usable cached response.
 
 ## API
 
-| Method | Path               | Description                                     |
-|--------|--------------------|-------------------------------------------------|
-| GET    | `/api/health`      | Liveness probe for TestLab itself               |
-| GET    | `/api/services`    | Discovered service list + last-discovery time   |
-| GET    | `/api/status`      | Cached probe results + summary (30 s TTL)       |
-| POST   | `/api/check`       | Force a fresh probe of all services             |
-| POST   | `/api/rediscover`  | Re-parse nginx + overrides, then probe          |
+| Method | Path                       | Description                                        |
+|--------|----------------------------|----------------------------------------------------|
+| GET    | `/api/health`              | Liveness probe for TestLab itself                  |
+| GET    | `/api/services`            | Discovered service list + last-discovery time      |
+| GET    | `/api/status`              | Probe results + 24 h uptime/avg-latency summary    |
+| GET    | `/api/sparklines`          | Bulk: last-30 latency points per host (cheap)      |
+| GET    | `/api/sparkline/:host`     | Per-host latency series (up to 120 points)         |
+| GET    | `/api/history/:host`       | Per-host raw checks for the last N hours (≤ 48)    |
+| POST   | `/api/check`               | Force a fresh probe of all services (rate-limited) |
+| POST   | `/api/rediscover`          | Re-parse nginx + overrides, then probe (rate-lim.) |
+
+`POST /api/check` and `POST /api/rediscover` are limited to 12 requests per
+minute per client IP — anything beyond returns `429` with `Retry-After`.
 
 ## Configuring with `config/overrides.json`
 
@@ -144,8 +150,15 @@ cd /home/micu/testlab && npm install --omit=dev
 └── src/
     ├── server.js             # Fastify app, API, lifecycle
     ├── discovery.js          # nginx parser + ss snapshot
-    └── healthcheck.js        # HTTP probe + status classifier
+    ├── healthcheck.js        # HTTP probe + status classifier
+    └── history.js            # node:sqlite ring buffer (48 h retention)
 ```
+
+Runtime data:
+
+- `state/history.db` (+ `-shm`, `-wal`) — SQLite ring buffer of every probe
+  for the last 48 h. Pruned every hour. `umask 0027` from systemd makes it
+  group-readable but not world-readable.
 
 System files installed outside the project (do not commit):
 

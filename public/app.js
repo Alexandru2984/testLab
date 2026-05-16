@@ -21,7 +21,52 @@ const state = {
   lastCheckedAt: null,
   query: '',
   statusFilter: 'all',
+  sparklines: {},
 };
+
+const SPARK_W = 120;
+const SPARK_H = 28;
+
+function renderSparkline(points) {
+  if (!points || points.length === 0) {
+    return `<svg class="spark empty" viewBox="0 0 ${SPARK_W} ${SPARK_H}" preserveAspectRatio="none"><text class="placeholder" x="4" y="18">no data yet</text></svg>`;
+  }
+  if (points.length === 1) {
+    const p = points[0];
+    return `<svg class="spark" viewBox="0 0 ${SPARK_W} ${SPARK_H}" preserveAspectRatio="none"><circle class="dot ${p.status}" cx="${SPARK_W / 2}" cy="${SPARK_H / 2}" r="2.5" /></svg>`;
+  }
+  const max = Math.max(...points.map((p) => p.latency || 0), 100);
+  const min = 0;
+  const step = SPARK_W / (points.length - 1);
+  const y = (v) => {
+    const norm = (v - min) / (max - min || 1);
+    return SPARK_H - 2 - norm * (SPARK_H - 6);
+  };
+  const linePts = points.map((p, i) => `${(i * step).toFixed(1)},${y(p.latency).toFixed(1)}`);
+  const area =
+    `M0,${SPARK_H} L` +
+    linePts.join(' L') +
+    ` L${((points.length - 1) * step).toFixed(1)},${SPARK_H} Z`;
+  const line = 'M' + linePts.join(' L');
+  const dots = points
+    .map(
+      (p, i) =>
+        `<circle class="dot ${p.status}" cx="${(i * step).toFixed(1)}" cy="${y(p.latency).toFixed(1)}" />`
+    )
+    .join('');
+  return `<svg class="spark" viewBox="0 0 ${SPARK_W} ${SPARK_H}" preserveAspectRatio="none">
+    <path class="area" d="${area}" />
+    <path class="line" d="${line}" />
+    ${dots}
+  </svg>`;
+}
+
+function uptimeTier(pct) {
+  if (pct == null) return null;
+  if (pct >= 99) return 'good';
+  if (pct >= 95) return 'warn';
+  return 'bad';
+}
 
 function stackBadge(stack) {
   const key = String(stack || '').toLowerCase();
@@ -118,6 +163,10 @@ function renderCards(results) {
           : r.reason
             ? r.reason
             : '—';
+      const sparkPoints = state.sparklines[r.host] || [];
+      const uptimeTxt =
+        r.uptimePct24h == null ? '—' : `${r.uptimePct24h.toFixed(1)}%`;
+      const tier = uptimeTier(r.uptimePct24h);
       return `
         <article class="card" data-status="${r.status}">
           <div class="card-head">
@@ -126,6 +175,10 @@ function renderCards(results) {
           </div>
           <p class="card-desc">${escapeHtml(r.description || '')}</p>
           ${metaChips(r)}
+          <div class="spark-wrap" title="Last ${sparkPoints.length || 0} checks · 24h uptime ${uptimeTxt}">
+            ${renderSparkline(sparkPoints)}
+            <span class="uptime-pill"${tier ? ` data-tier="${tier}"` : ''}>${uptimeTxt}</span>
+          </div>
           <div class="card-row">
             <span class="status-pill" data-status="${r.status}">
               <span class="status-dot"></span>${statusLabel(r.status)}
@@ -158,13 +211,27 @@ function renderOverview(summary, lastCheckedAt) {
     : 'Never checked';
 }
 
+async function loadSparklines() {
+  try {
+    const res = await fetch('/api/sparklines?points=30');
+    if (!res.ok) return;
+    const data = await res.json();
+    state.sparklines = data.series || {};
+  } catch (err) {
+    console.warn('sparklines load failed', err);
+  }
+}
+
 async function loadStatus({ force = false } = {}) {
   setLoading(true);
   try {
     const endpoint = force ? '/api/check' : '/api/status';
-    const res = await fetch(endpoint, { method: force ? 'POST' : 'GET' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const [statusRes] = await Promise.all([
+      fetch(endpoint, { method: force ? 'POST' : 'GET' }),
+      loadSparklines(),
+    ]);
+    if (!statusRes.ok) throw new Error(`HTTP ${statusRes.status}`);
+    const data = await statusRes.json();
     state.results = data.results || [];
     state.summary = data.summary;
     state.lastCheckedAt = data.lastCheckedAt;
